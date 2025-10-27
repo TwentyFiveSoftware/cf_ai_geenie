@@ -1,0 +1,29 @@
+{
+    "name": "geenie",
+    "main": "src/server/index.ts",
+    "compatibility_date": "2025-08-03",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+    "ai": {
+        "binding": "AI",
+        "remote": true
+    },
+    "durable_objects": {
+        "bindings": [
+            {
+                "name": "GeenieAgent", // How your Agent is called from the Worker
+                "class_name": "GeenieAgent" // Must match the class name of the Agent in the code
+            }
+        ]
+    },
+    "migrations": [
+        {
+            "tag": "v1",
+            "new_sqlite_classes": ["GeenieAgent"]
+        }
+    ],
+    "observability": {
+        "enabled": true
+    }
+}

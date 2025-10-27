@@ -5,18 +5,25 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "dev:workers": "wrangler dev",
         "build": "tsc -b && vite build",
         "lint": "eslint .",
-        "preview": "vite preview",
-        "deploy": "npx wrangler pages deploy dist"
+        "deploy:pages": "npx wrangler pages deploy dist",
+        "deploy:workers": "wrangler deploy",
+        "types": "wrangler types env.d.ts --include-runtime false"
     },
     "dependencies": {
+        "@ai-sdk/react": "^2.0.80",
         "@tailwindcss/vite": "^4.1.16",
+        "agents": "^0.2.17",
+        "ai": "^5.0.80",
         "react": "^19.1.1",
         "react-dom": "^19.1.1",
-        "tailwindcss": "^4.1.16"
+        "tailwindcss": "^4.1.16",
+        "workers-ai-provider": "^2.0.0"
     },
     "devDependencies": {
+        "@cloudflare/workers-types": "^4.20251014.0",
         "@eslint/js": "^9.36.0",
         "@types/node": "^24.6.0",
         "@types/react": "^19.1.16",
