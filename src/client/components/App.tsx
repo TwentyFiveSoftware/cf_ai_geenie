@@ -45,10 +45,19 @@ export const App: React.FC = () => {
                     <li key={message.id} className="flex">
                         <div className="w-[140px] text-left">{message.role.toUpperCase()}</div>
                         <div className="text-left w-full">
-                            {message.parts
-                                .filter(part => part.type === 'text')
-                                .map(part => part.text)
-                                .join('|')}
+                            {message.parts.map((part, index) => (
+                                <div key={index}>
+                                    {part.type === 'text' ? (
+                                        <div>{part.text}</div>
+                                    ) : part.type === 'dynamic-tool' ? (
+                                        <div>[DYNAMIC TOOL] {JSON.stringify(part)}</div>
+                                    ) : part.type === 'tool-executeOverpassQuery' ? (
+                                        <div>[tool-executeOverpassQuery] {JSON.stringify(part)}</div>
+                                    ) : (
+                                        <div>[UNKNOWN MESSAGE PART] {JSON.stringify(part)}</div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </li>
                 ))}
@@ -56,9 +65,9 @@ export const App: React.FC = () => {
 
             <form
                 className="flex gap-2"
-                onSubmit={e => {
+                onSubmit={async e => {
                     e.preventDefault();
-                    sendChatMessage();
+                    await sendChatMessage();
                 }}
             >
                 <input

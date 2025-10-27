@@ -8,6 +8,7 @@ import {
     type ToolSet,
 } from 'ai';
 import { createWorkersAI } from 'workers-ai-provider';
+import { executeOverpassQuery } from './tools';
 
 export class GeenieAgent extends AIChatAgent<Env> {
     private cloudflareWorkersAI = createWorkersAI({ binding: this.env.AI });
@@ -20,12 +21,13 @@ export class GeenieAgent extends AIChatAgent<Env> {
             abortSignal: AbortSignal | undefined;
         },
     ): Promise<Response | undefined> {
-        console.log(JSON.stringify(convertToModelMessages(this.messages)));
-
         const result = streamText({
             system: GeenieAgent.SYSTEM_PROMPT,
             messages: convertToModelMessages(this.messages),
             model: this.cloudflareWorkersAI('@cf/meta/llama-3.1-8b-instruct-fp8', { safePrompt: true }),
+            tools: {
+                executeOverpassQuery,
+            },
             onFinish,
             abortSignal: options?.abortSignal,
         });
