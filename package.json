@@ -17,8 +17,10 @@
         "@tailwindcss/vite": "^4.1.16",
         "agents": "^0.2.17",
         "ai": "^5.0.80",
+        "leaflet": "^1.9.4",
         "react": "^19.1.1",
         "react-dom": "^19.1.1",
+        "react-leaflet": "^5.0.0",
         "tailwindcss": "^4.1.16",
         "workers-ai-provider": "^2.0.0",
         "zod": "^3.25.76"
@@ -26,6 +28,7 @@
     "devDependencies": {
         "@cloudflare/workers-types": "^4.20251014.0",
         "@eslint/js": "^9.36.0",
+        "@types/leaflet": "^1.9.21",
         "@types/node": "^24.6.0",
         "@types/react": "^19.1.16",
         "@types/react-dom": "^19.1.9",

@@ -1,9 +1,8 @@
-import './App.css';
-import * as React from 'react';
+import React, { useState } from 'react';
 import { useAgent } from 'agents/react';
 import { useAgentChat } from 'agents/ai-react';
 import type { UIMessage } from 'ai';
-import { useState } from 'react';
+import { type OSMNode, ResultMap } from './ResultMap.tsx';
 
 export const App: React.FC = () => {
     const agent = useAgent({
@@ -38,7 +37,7 @@ export const App: React.FC = () => {
 
     return (
         <div>
-            <h1>Geenie.</h1>
+            <h1 className="text-4xl font-bold">Geenie.</h1>
 
             <div className="grid gap-2 my-10">
                 {agentChat.messages.map(message => (
@@ -52,7 +51,11 @@ export const App: React.FC = () => {
                                     ) : part.type === 'dynamic-tool' ? (
                                         <div>[DYNAMIC TOOL] {JSON.stringify(part)}</div>
                                     ) : part.type === 'tool-executeOverpassQuery' ? (
-                                        <div>[tool-executeOverpassQuery] {JSON.stringify(part)}</div>
+                                        part.state === 'output-available' ? (
+                                            <ResultMap elements={(part.output as { elements: OSMNode[] }).elements} />
+                                        ) : (
+                                            <div>[executeOverpassQuery] State: {part.state}</div>
+                                        )
                                     ) : (
                                         <div>[UNKNOWN MESSAGE PART] {JSON.stringify(part)}</div>
                                     )}
