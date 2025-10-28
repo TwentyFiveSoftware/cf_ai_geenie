@@ -36,7 +36,9 @@ export const App: React.FC = () => {
         return (
             <div className="w-full h-svh grid items-center justify-items-center p-4">
                 <div className="w-full max-w-[750px] mb-10">
-                    <h1 className="text-5xl font-bold text-center mb-2">Geenie.</h1>
+                    <h1 className="text-5xl font-bold text-center mb-2 text-blue-400">
+                        Geenie<span className="text-primary">.</span>
+                    </h1>
                     <div className="mb-10 text-center text-muted-foreground grid justify-items-center">
                         <div className="w-[80%]">
                             Explore the world through words — ask Geenie for any place, landmark, or point of interest,
@@ -57,7 +59,9 @@ export const App: React.FC = () => {
                 style={{ scrollbarGutter: 'stable both-edges' }}
             >
                 <div className="w-full max-w-[750px]">
-                    <h1 className="text-4xl font-bold my-4">Geenie.</h1>
+                    <h1 className="text-4xl font-bold my-4 text-blue-400">
+                        Geenie<span className="text-primary">.</span>
+                    </h1>
 
                     <Chat messages={agentChat.messages} isWaitingForResponse={agentChat.status === 'submitted'} />
                 </div>

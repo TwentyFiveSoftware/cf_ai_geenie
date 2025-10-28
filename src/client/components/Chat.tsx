@@ -1,7 +1,8 @@
 import React from 'react';
-import type { UIMessage } from 'ai';
+import type { ToolUIPart, UIMessage } from 'ai';
 import { type OSMNode, ResultMap } from '@/client/components/ResultMap.tsx';
-import { DotIcon } from 'lucide-react';
+import { CircleAlert, CircleCheckIcon, CircleQuestionMarkIcon, DotIcon, LoaderCircleIcon } from 'lucide-react';
+import { cn } from '@/lib/utils.ts';
 
 type Props = {
     messages: UIMessage[];
@@ -51,43 +52,87 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
                         return part.text;
 
                     case 'step-start':
-                        return index > 0 ? <div className="border-b-2" key={index} /> : <></>;
+                        return <div key={index} className={cn(index > 0 && 'mb-5')} />;
 
                     case 'tool-executeOverpassQuery':
-                        switch (part.state) {
-                            case 'input-streaming':
-                                return <div key={part.toolCallId}>Generating Overpass query...</div>;
+                        return (
+                            <>
+                                <ToolMessagePart
+                                    key={part.toolCallId}
+                                    part={part}
+                                    runningStateText="Executing Overpass query..."
+                                    successStateText="Overpass query executed"
+                                    errorStateText="Overpass query resulted in an error"
+                                />
 
-                            case 'input-available':
-                                return <div key={part.toolCallId}>Executing Overpass query...</div>;
-
-                            case 'output-available':
-                                return (
+                                {part.state === 'output-available' && (
                                     <ResultMap
                                         key={part.toolCallId}
                                         elements={(part.output as { elements: OSMNode[] }).elements}
                                     />
-                                );
+                                )}
+                            </>
+                        );
 
-                            case 'output-error':
-                                return (
-                                    <div key={part.toolCallId} className="text-destructive">
-                                        Error executing Overpass query: {part.errorText}
-
-                                        <code className="block font-mono mt-3">
-                                            {JSON.stringify(part.input)}
-                                        </code>
-                                    </div>
-                                );
-
-                            default:
-                                return <></>;
-                        }
+                    case 'tool-nominatimLocationSearch':
+                        return (
+                            <ToolMessagePart
+                                key={part.toolCallId}
+                                part={part}
+                                runningStateText="Executing Nominatim search query..."
+                                successStateText="Nominatim search completed"
+                                errorStateText="Nominatim search resulted in an error"
+                            />
+                        );
 
                     default:
-                        return <></>;
+                        return (
+                            <div key={index}>
+                                [UNKNOWN PART TYPE: {part.type}] {JSON.stringify(part)}
+                            </div>
+                        );
                 }
             })}
+        </div>
+    );
+};
+
+const ToolMessagePart: React.FC<{
+    part: ToolUIPart;
+    runningStateText: string;
+    successStateText: string;
+    errorStateText: string;
+}> = ({ part, runningStateText, successStateText, errorStateText }) => {
+    let icon = <CircleQuestionMarkIcon />;
+    let text = <div>...</div>;
+
+    switch (part.state) {
+        case 'input-streaming':
+        case 'input-available':
+            icon = <LoaderCircleIcon className="stroke-blue-400" />;
+            text = <div className="text-blue-400">{runningStateText}</div>;
+            break;
+
+        case 'output-available':
+            icon = <CircleCheckIcon className="stroke-blue-400" />;
+            text = <div className="text-blue-400">{successStateText}</div>;
+            break;
+
+        case 'output-error':
+            icon = <CircleAlert className="stroke-destructive" />;
+            text = (
+                <div className="text-destructive">
+                    {errorStateText}
+                    {part.errorText}
+                    <code className="block font-mono mt-3">{JSON.stringify(part.input)}</code>
+                </div>
+            );
+            break;
+    }
+
+    return (
+        <div className="flex gap-3">
+            {icon} {text}
         </div>
     );
 };
