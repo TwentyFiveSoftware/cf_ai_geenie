@@ -17,13 +17,17 @@ export type OSMNode = {
 export const ResultMap: React.FC<Props> = ({ elements }) => {
     console.log(elements);
 
+    if(elements.length === 0) {
+        return <div className="w-full rounded-xl border-2 py-10 text-center color-muted">No results</div>;
+    }
+
     const mapCenter: LatLngExpression = elements.length > 0 ? [elements[0].lat, elements[0].lon] : [0, 0];
 
     return (
-        <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={true} className="w-full h-[500px]">
+        <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={true} className="w-full aspect-video rounded-xl">
             <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
 
             {elements.map(element => (
@@ -31,7 +35,7 @@ export const ResultMap: React.FC<Props> = ({ elements }) => {
                     <Popup>
                         <ul>
                             {Object.entries(element.tags).map(([key, value]) => (
-                                <li>
+                                <li key={key}>
                                     <b>{key}</b>: {value}
                                 </li>
                             ))}

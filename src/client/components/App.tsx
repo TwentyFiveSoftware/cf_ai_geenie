@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAgent } from 'agents/react';
 import { useAgentChat } from 'agents/ai-react';
 import type { UIMessage } from 'ai';
-import { type OSMNode, ResultMap } from './ResultMap.tsx';
+import { ChatInput } from '@/client/components/ChatInput.tsx';
+import { Chat } from '@/client/components/Chat.tsx';
 
 export const App: React.FC = () => {
     const agent = useAgent({
@@ -16,77 +17,39 @@ export const App: React.FC = () => {
 
     const isAgentReadyForNextMessage = agentChat.status === 'ready';
 
-    const [userMessage, setUserMessage] = useState<string>('');
-
-    const sendChatMessage = async () => {
-        if (userMessage === '' || !isAgentReadyForNextMessage) {
+    const sendChatMessage = async (message: string) => {
+        if (!isAgentReadyForNextMessage) {
             return;
         }
 
         agentChat.sendMessage({
             role: 'user',
-            parts: [{ type: 'text', text: userMessage }],
+            parts: [{ type: 'text', text: message }],
         });
-
-        setUserMessage('');
     };
 
-    const clearHistory = async () => {
-        agentChat.clearHistory();
-    };
+    // const clearHistory = async () => {
+    //     agentChat.clearHistory();
+    // };
 
     return (
-        <div>
-            <h1 className="text-4xl font-bold">Geenie.</h1>
+        <div className="w-full h-svh grid grid-rows-[1fr_120px]">
+            <div
+                className="overflow-auto grid justify-items-center p-4"
+                style={{ scrollbarGutter: 'stable both-edges' }}
+            >
+                <div className="w-full max-w-[750px]">
+                    <h1 className="text-4xl font-bold my-4">Geenie.</h1>
 
-            <div className="grid gap-2 my-10">
-                {agentChat.messages.map(message => (
-                    <li key={message.id} className="flex">
-                        <div className="w-[140px] text-left">{message.role.toUpperCase()}</div>
-                        <div className="text-left w-full">
-                            {message.parts.map((part, index) => (
-                                <div key={index}>
-                                    {part.type === 'text' ? (
-                                        <div>{part.text}</div>
-                                    ) : part.type === 'dynamic-tool' ? (
-                                        <div>[DYNAMIC TOOL] {JSON.stringify(part)}</div>
-                                    ) : part.type === 'tool-executeOverpassQuery' ? (
-                                        part.state === 'output-available' ? (
-                                            <ResultMap elements={(part.output as { elements: OSMNode[] }).elements} />
-                                        ) : (
-                                            <div>[executeOverpassQuery] State: {part.state}</div>
-                                        )
-                                    ) : (
-                                        <div>[UNKNOWN MESSAGE PART] {JSON.stringify(part)}</div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </li>
-                ))}
+                    <Chat messages={agentChat.messages} isWaitingForResponse={agentChat.status === 'submitted'} />
+                </div>
             </div>
 
-            <form
-                className="flex gap-2"
-                onSubmit={async e => {
-                    e.preventDefault();
-                    await sendChatMessage();
-                }}
-            >
-                <input
-                    type="text"
-                    value={userMessage}
-                    onChange={e => setUserMessage(e.target.value)}
-                    placeholder="Ask anything"
-                    className="border px-4 w-full"
-                />
-                <button type="submit" disabled={!isAgentReadyForNextMessage}>
-                    SEND
-                </button>
-                <button type="button" onClick={() => clearHistory()}>
-                    Clear history
-                </button>
-            </form>
+            <div className="grid justify-items-center p-4">
+                <div className="w-full max-w-[750px]">
+                    <ChatInput sendChatMessage={sendChatMessage} />
+                </div>
+            </div>
         </div>
     );
 };
