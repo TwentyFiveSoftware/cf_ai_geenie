@@ -28,9 +28,27 @@ export const App: React.FC = () => {
         });
     };
 
-    // const clearHistory = async () => {
-    //     agentChat.clearHistory();
-    // };
+    const clearHistory = async () => {
+        agentChat.clearHistory();
+    };
+
+    if (agentChat.messages.length === 0) {
+        return (
+            <div className="w-full h-svh grid items-center justify-items-center p-4">
+                <div className="w-full max-w-[750px] mb-10">
+                    <h1 className="text-5xl font-bold text-center mb-2">Geenie.</h1>
+                    <div className="mb-10 text-center text-muted-foreground grid justify-items-center">
+                        <div className="w-[80%]">
+                            Explore the world through words — ask Geenie for any place, landmark, or point of interest,
+                            and watch it appear.
+                        </div>
+                    </div>
+
+                    <ChatInput sendChatMessage={sendChatMessage} />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full h-svh grid grid-rows-[1fr_120px]">
@@ -48,6 +66,14 @@ export const App: React.FC = () => {
             <div className="grid justify-items-center p-4">
                 <div className="w-full max-w-[750px]">
                     <ChatInput sendChatMessage={sendChatMessage} />
+
+                    <div className="text-xs ml-5 mt-2 text-center w-full inline-block">
+                        or start over with{' '}
+                        <a className="underline cursor-pointer hover:text-primary" onClick={() => clearHistory()}>
+                            new chat
+                        </a>
+                        , deleting this conversation.
+                    </div>
                 </div>
             </div>
         </div>

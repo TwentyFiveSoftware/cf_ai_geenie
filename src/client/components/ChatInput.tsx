@@ -32,7 +32,7 @@ export const ChatInput: React.FC<Props> = ({ sendChatMessage }) => {
                     value={userMessage}
                     onChange={e => setUserMessage(e.target.value)}
                 />
-                <Button className="rounded-3xl aspect-square p-0" type="submit">
+                <Button className="rounded-3xl aspect-square p-0" type="submit" disabled={userMessage === ''}>
                     <SendIcon />
                 </Button>
             </div>
