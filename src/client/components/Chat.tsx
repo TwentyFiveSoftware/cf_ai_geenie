@@ -11,7 +11,7 @@ type Props = {
 
 export const Chat: React.FC<Props> = ({ messages, isWaitingForResponse }) => {
     return (
-        <div className="flex flex-col gap-4 mb-10">
+        <div className="flex flex-col gap-8 mb-10">
             {messages.map(message => {
                 switch (message.role) {
                     case 'user':
@@ -49,7 +49,7 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
             {message.parts.map((part, index) => {
                 switch (part.type) {
                     case 'text':
-                        return part.text;
+                        return <div className="w-full whitespace-pre-wrap text-wrap">{part.text}</div>;
 
                     case 'step-start':
                         return <div key={index} className={cn(index > 0 && 'mb-5')} />;
@@ -66,10 +66,14 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
                                 />
 
                                 {part.state === 'output-available' && (
-                                    <ResultMap
-                                        key={part.toolCallId}
-                                        elements={(part.output as { elements: OSMNode[] }).elements}
-                                    />
+                                    <>
+                                        <div className="mb-5"/>
+
+                                        <ResultMap
+                                            key={part.toolCallId}
+                                            elements={(part.output as { elements: OSMNode[] }).elements}
+                                        />
+                                    </>
                                 )}
                             </>
                         );
@@ -109,7 +113,7 @@ const ToolMessagePart: React.FC<{
     switch (part.state) {
         case 'input-streaming':
         case 'input-available':
-            icon = <LoaderCircleIcon className="stroke-blue-400" />;
+            icon = <LoaderCircleIcon className="stroke-blue-400 animate-spin" />;
             text = <div className="text-blue-400">{runningStateText}</div>;
             break;
 
@@ -122,8 +126,7 @@ const ToolMessagePart: React.FC<{
             icon = <CircleAlert className="stroke-destructive" />;
             text = (
                 <div className="text-destructive">
-                    {errorStateText}
-                    {part.errorText}
+                    <span>{errorStateText}: {part.errorText}</span>
                     <code className="block font-mono mt-3">{JSON.stringify(part.input)}</code>
                 </div>
             );

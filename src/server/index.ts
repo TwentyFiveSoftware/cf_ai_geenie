@@ -12,20 +12,20 @@ import { createWorkersAI } from 'workers-ai-provider';
 import { executeOverpassQuery, nominatimLocationSearch } from './tools';
 
 export class GeenieAgent extends AIChatAgent<Env> {
-    private cloudflareWorkersAI = createWorkersAI({ binding: this.env.AI });
+    private readonly cloudflareWorkersAI = createWorkersAI({ binding: this.env.AI });
 
-    private static SYSTEM_PROMPT: string = `You are Geenie, a helpful assistant and map data expert.
-Your ultimate goal is to convert the user's natural-language request into an Overpass QL query.
-Iterate and use the tools until you get a desired response!
+    private static readonly SYSTEM_PROMPT: string = `You are Geenie, a helpful assistant and map data expert.
+Your ultimate goal is to convert a user's natural-language request into an Overpass QL query and execute it.
 
 The Overpass QL query must contain an accurate bounding box or location matching the user's request.
 Do not come up with the coordinates yourself! Instead, use the nominatimLocationSearch tool first, before trying to generate an Overpass query.
 
 After having the correct bounding box or location, generate a correct Overpass QL query using nodes/ways/relations with appropriate tags and the location.
-Use the executeOverpassQuery tool to execute this Overpass QL query.
+Use the executeOverpassQuery tool to execute this Overpass QL query, the results will then be displayed on a map for the uses.
 
-In the final response, do not include the tool or function names. Just highlight a few places of the response.
-`;
+In the final response, do not include the tool or function names.
+Instead, just mention the number of results, and highlight the top 3 places of the response.
+`.trim();
 
     async onChatMessage(
         onFinish: StreamTextOnFinishCallback<ToolSet>,
