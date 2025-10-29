@@ -75,3 +75,34 @@ Examples: "Amsterdam", "Time Square, New York"
         return await result.json();
     },
 } satisfies Tool<{ search: string }, unknown>;
+
+export const mapFeatureWikiRAG = (env: Env) =>
+    ({
+        description: `
+Retrieve information from the OpenStreetMap wiki about the most common map features (i.e. tags with key and values) alongside their descriptions.
+These key-value pairs are important for generating Overpass QL queries to actually return the desired map features.
+`.trim(),
+        inputSchema: z.object({
+            mapFeature: z.string().describe('desired map feature for which to look up valid tags'),
+        }),
+        execute: async ({ mapFeature }) => {
+            console.log('"mapFeatureWikiRAG"', mapFeature);
+
+            const embedding = await env.AI.run('@cf/baai/bge-large-en-v1.5', { text: mapFeature });
+            const vector = (embedding as { data: number[][] }).data[0]; // shape: [1, 1024]
+
+            const { matches } = await env.VECTORIZE.query(vector, {
+                namespace: 'map_features',
+                topK: 3,
+                returnMetadata: 'none',
+                returnValues: false,
+            });
+
+            const stmt = env.prod_openstreetmap_wiki_tags.prepare(
+                'SELECT content FROM map_features WHERE category = ? LIMIT 1',
+            );
+
+            const results = await Promise.all(matches.map(match => stmt.bind(match.id).first<string>('content')));
+            return results.filter(content => content !== null);
+        },
+    }) satisfies Tool<{ mapFeature: string }, unknown>;
