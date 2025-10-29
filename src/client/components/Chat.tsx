@@ -49,10 +49,14 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
             {message.parts.map((part, index) => {
                 switch (part.type) {
                     case 'text':
-                        return <div className="w-full whitespace-pre-wrap text-wrap">{part.text}</div>;
+                        return (
+                            <div className="w-full whitespace-pre-wrap text-wrap" key={index}>
+                                {part.text}
+                            </div>
+                        );
 
                     case 'step-start':
-                        return <div key={index} className={cn(index > 0 && 'mb-5')} />;
+                        return <div key={index} className={cn(index > 0 && 'mb-2')} />;
 
                     case 'tool-executeOverpassQuery':
                         return (
@@ -66,14 +70,12 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
                                 />
 
                                 {part.state === 'output-available' && (
-                                    <>
-                                        <div className="mb-5"/>
-
+                                    <div className="my-5">
                                         <ResultMap
                                             key={part.toolCallId}
                                             elements={(part.output as { elements: OSMNode[] }).elements}
                                         />
-                                    </>
+                                    </div>
                                 )}
                             </>
                         );
@@ -83,9 +85,9 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
                             <ToolMessagePart
                                 key={part.toolCallId}
                                 part={part}
-                                runningStateText="Executing Nominatim search query..."
-                                successStateText="Nominatim search completed"
-                                errorStateText="Nominatim search resulted in an error"
+                                runningStateText="Executing Nominatim location search query..."
+                                successStateText="Nominatim location search completed"
+                                errorStateText="Nominatim location search resulted in an error"
                             />
                         );
 
@@ -126,7 +128,9 @@ const ToolMessagePart: React.FC<{
             icon = <CircleAlert className="stroke-destructive" />;
             text = (
                 <div className="text-destructive">
-                    <span>{errorStateText}: {part.errorText}</span>
+                    <span>
+                        {errorStateText}: {part.errorText}
+                    </span>
                     <code className="block font-mono mt-3">{JSON.stringify(part.input)}</code>
                 </div>
             );

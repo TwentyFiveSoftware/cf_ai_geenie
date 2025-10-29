@@ -53,9 +53,7 @@ export const nominatimLocationSearch = {
 Looks up the coordinates of a given postal address using the OpenStreetMap Nominatim API.
 This tool returns the latitude and longitude of the searched address.
 
-Example 1: "Amsterdam"
-Example 2: "Time Square, New York"
-Negative Example (does not yield results): "Cafe in New York"
+Examples: "Amsterdam", "Time Square, New York"
 `.trim(),
     inputSchema: z.object({ search: z.string().describe('postal address') }),
     execute: async ({ search }) => {
