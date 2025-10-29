@@ -12,18 +12,44 @@
     "durable_objects": {
         "bindings": [
             {
-                "name": "GeenieAgent", // How your Agent is called from the Worker
-                "class_name": "GeenieAgent" // Must match the class name of the Agent in the code
+                // How your Agent is called from the Worker
+                "name": "GeenieAgent",
+                // Must match the class name of the Agent in the code
+                "class_name": "GeenieAgent"
             }
         ]
     },
     "migrations": [
         {
             "tag": "v1",
-            "new_sqlite_classes": ["GeenieAgent"]
+            "new_sqlite_classes": [
+                "GeenieAgent"
+            ]
+        }
+    ],
+    "vectorize": [
+        {
+            "binding": "VECTORIZE",
+            "index_name": "prod-openstreetmap-wiki",
+            "remote": true
+        }
+    ],
+    "d1_databases": [
+        {
+            "binding": "prod_openstreetmap_wiki_tags",
+            "database_name": "prod-openstreetmap-wiki-tags",
+            "database_id": "b42ed127-810a-4941-91f4-a1f54a4e34ab",
+            "remote": true
         }
     ],
     "observability": {
         "enabled": true
-    }
+    },
+    "workflows": [
+        {
+            "name": "crawl-openstreetmap-wiki-tags",
+            "binding": "CRAWL_OPENSTREETMAP_WIKI_TAGS",
+            "class_name": "CrawlOpenStreetMapWikiTagsWorkflow"
+        }
+    ]
 }

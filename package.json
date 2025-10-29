@@ -10,7 +10,7 @@
         "lint": "eslint .",
         "deploy:pages": "npx wrangler pages deploy dist",
         "deploy:workers": "wrangler deploy",
-        "types": "wrangler types env.d.ts --include-runtime false"
+        "types": "wrangler types"
     },
     "dependencies": {
         "@ai-sdk/openai": "^2.0.57",

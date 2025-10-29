@@ -11,6 +11,7 @@ import {
 // import { createWorkersAI } from 'workers-ai-provider';
 import { openai } from '@ai-sdk/openai';
 import { executeOverpassQuery, nominatimLocationSearch } from './tools';
+import { CrawlOpenStreetMapWikiTagsWorkflow } from './workflows/crawlOpenStreetMapWikiTags';
 
 const model = openai('gpt-4.1');
 
@@ -63,3 +64,5 @@ export default {
         return (await routeAgentRequest(request, env)) || new Response('Not found', { status: 404 });
     },
 } satisfies ExportedHandler<Env>;
+
+export { CrawlOpenStreetMapWikiTagsWorkflow };
