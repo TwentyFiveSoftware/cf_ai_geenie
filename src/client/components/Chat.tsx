@@ -1,12 +1,12 @@
 import React from 'react';
 import type { ToolUIPart, UIMessage } from 'ai';
-import { type MapElement, ResultMap } from '@/client/components/ResultMap.tsx';
+import { type OSMElement, ResultMap } from '@/client/components/ResultMap.tsx';
 import { CircleAlert, CircleCheckIcon, CircleQuestionMarkIcon, DotIcon, LoaderCircleIcon } from 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible.tsx';
 
 type Props = {
     messages: UIMessage[];
-    overpassResults: Record<string, MapElement[]>;
+    overpassResults: Record<string, OSMElement[]>;
     isWaitingForResponse: boolean;
 };
 
@@ -46,7 +46,7 @@ const UserMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
     );
 };
 
-const AssistantMessage: React.FC<{ message: UIMessage; overpassResults: Record<string, MapElement[]> }> = ({
+const AssistantMessage: React.FC<{ message: UIMessage; overpassResults: Record<string, OSMElement[]> }> = ({
     message,
     overpassResults,
 }) => {

@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { CircleMarker, MapContainer, Marker, Polygon, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
 import { type LatLngTuple } from 'leaflet';
 
-export type MapElement = OSMNode | OSMWay | OSMRelation;
+export type OSMElement = OSMNode | OSMWay | OSMRelation;
 
-export const ResultMap: React.FC<{ elements: MapElement[] }> = ({ elements }) => {
+export const ResultMap: React.FC<{ elements: OSMElement[] }> = ({ elements }) => {
     if (elements.length === 0) {
         return <div className="w-full rounded-xl border-2 py-10 text-center color-muted">No results</div>;
     }
@@ -21,77 +21,11 @@ export const ResultMap: React.FC<{ elements: MapElement[] }> = ({ elements }) =>
     );
 };
 
-const MapLayers: React.FC<{ elements: MapElement[] }> = ({ elements }) => {
+const MapLayers: React.FC<{ elements: OSMElement[] }> = ({ elements }) => {
     const map = useMap();
 
-    const markers = elements
-        .map<Marker | null>(element => {
-            if (element.type === 'node') {
-                return { lat: element.lat, lon: element.lon, tags: element.tags ?? {} } satisfies Marker;
-            }
-
-            // if (element.type === 'way' && !element.geometry) {
-            //     if (element.center) {
-            //         return {
-            //             lat: element.center.lat,
-            //             lon: element.center.lon,
-            //             tags: element.tags ?? {},
-            //         } satisfies Marker;
-            //     }
-            //
-            //     if (element.bounds) {
-            //         return {
-            //             lat: (element.bounds.minlat + element.bounds.maxlat) / 2,
-            //             lon: (element.bounds.minlon + element.bounds.maxlon) / 2,
-            //             tags: element.tags ?? {},
-            //         } satisfies Marker;
-            //     }
-            // }
-
-            return null;
-        })
-        .filter(marker => marker !== null);
-
-    const polygons = elements
-        .flatMap<MapPolygon>(element => {
-            if (element.type === 'relation') {
-                const polygons = element.members
-                    .filter(member => member.type === 'way' && member.geometry)
-                    .map<MapPolygon>(
-                        member =>
-                            ({
-                                tags: member.tags ?? element.tags ?? {},
-                                geometry: member.geometry?.map<LatLngTuple>(point => [point.lat, point.lon]) ?? [],
-                                isClosed: member.role === 'inner' || member.role === 'outer',
-                                role: member.role,
-                                isVerySmall: false,
-                            }) satisfies MapPolygon,
-                    );
-
-                mergePolygonsInPlace(polygons);
-                return polygons;
-            }
-
-            if (element.type === 'way' && element.geometry) {
-                return [
-                    {
-                        geometry: element.geometry.map<LatLngTuple>(point => [point.lat, point.lon]),
-                        tags: element.tags ?? {},
-                        isClosed:
-                            element.nodes && element.nodes.length >= 2
-                                ? element.nodes[0] === element.nodes[element.nodes.length - 1]
-                                : false,
-                        isVerySmall:
-                            element.bounds &&
-                            Math.abs(element.bounds.maxlat - element.bounds.minlat) < 0.0005 &&
-                            Math.abs(element.bounds.maxlon - element.bounds.minlon) < 0.0005,
-                    } satisfies MapPolygon,
-                ];
-            }
-
-            return [];
-        })
-        .filter(polygon => polygon !== null);
+    const markers = useMemo(() => buildMarkers(elements), [elements]);
+    const polygons = useMemo(() => buildPolygons(elements), [elements]);
 
     useEffect(() => {
         if (markers.length === 0 && polygons.length === 0) {
@@ -127,7 +61,7 @@ const MapLayers: React.FC<{ elements: MapElement[] }> = ({ elements }) => {
                 .filter(polygon => !polygon.isClosed)
                 .map((polygon, index) => (
                     <React.Fragment key={index}>
-                        <Polyline pathOptions={{ color: 'black', weight: 5 }} positions={polygon.geometry}>
+                        <Polyline pathOptions={{ color: 'black', weight: 7 }} positions={polygon.geometry}>
                             <MapPopup tags={polygon.tags} />
                         </Polyline>
 
@@ -147,6 +81,10 @@ const MapLayers: React.FC<{ elements: MapElement[] }> = ({ elements }) => {
 };
 
 const MapPopup: React.FC<{ tags: Record<string, string> }> = ({ tags }) => {
+    if (Object.keys(tags).length === 0) {
+        return <></>;
+    }
+
     return (
         <Popup>
             <div className="py-1">
@@ -163,6 +101,109 @@ const MapPopup: React.FC<{ tags: Record<string, string> }> = ({ tags }) => {
             </div>
         </Popup>
     );
+};
+
+const buildMarkers = (elements: OSMElement[]): MapMarker[] => {
+    return elements
+        .filter(element => element.type === 'node' && element.tags)
+        .map(node => node as OSMNode)
+        .map(
+            node =>
+                ({
+                    lat: node.lat,
+                    lon: node.lon,
+                    tags: node.tags!,
+                }) satisfies MapMarker,
+        );
+};
+
+const buildPolygons = (elements: OSMElement[]): MapPolygon[] => {
+    const nodes: OSMNode[] = elements.filter(element => element.type === 'node');
+    const ways: OSMWay[] = elements.filter(element => element.type === 'way');
+    const relations: OSMRelation[] = elements.filter(element => element.type === 'relation');
+
+    const wayPolygons: MapPolygon[] = [];
+
+    // build 'way' polygons
+    for (const way of ways) {
+        if (way.geometry) {
+            // independent way that can be used directly
+            wayPolygons.push(
+                getMapPolygonFromWay(
+                    way,
+                    way.geometry.map<LatLngTuple>(point => [point.lat, point.lon]),
+                ),
+            );
+
+            continue;
+        }
+
+        if (way.nodes) {
+            // find referenced nodes based on id
+            const geometry: LatLngTuple[] = way.nodes.flatMap(id => {
+                const node = nodes.find(node => node.id === id);
+                return node ? [[node.lat, node.lon]] : [];
+            });
+
+            // if some referenced nodes does not exit, ignore this way
+            if (geometry.length !== way.nodes.length) {
+                continue;
+            }
+
+            wayPolygons.push(getMapPolygonFromWay(way, geometry));
+        }
+    }
+
+    const relationPolygons: MapPolygon[] = [];
+
+    // build 'relation' polygons
+    for (const relation of relations) {
+        const polygons: MapPolygon[] = [];
+
+        for (const member of relation.members) {
+            if (member.type === 'node') {
+                continue; // ignore nodes inside relations
+            }
+
+            if (member.type === 'way') {
+                if (member.geometry) {
+                    // independent way that can be used directly
+                    polygons.push({
+                        id: member.id,
+                        geometry: member.geometry.map<LatLngTuple>(point => [point.lat, point.lon]) ?? [],
+                        tags: relation.tags ?? member.tags ?? {},
+                        isClosed: member.role === 'inner' || member.role === 'outer',
+                        role: member.role,
+                        isVerySmall: false,
+                    } satisfies MapPolygon);
+                } else if (member.ref) {
+                    // find way based on id
+                    const index = wayPolygons.findIndex(wayPolygon => wayPolygon.id === member.ref);
+                    if (index === -1) {
+                        continue;
+                    }
+
+                    const wayPolygon = wayPolygons[index];
+
+                    wayPolygons.splice(index, 1);
+
+                    polygons.push({
+                        id: member.ref,
+                        geometry: wayPolygon.geometry,
+                        tags: relation.tags ?? member.tags ?? wayPolygon.tags,
+                        isClosed: member.role === 'inner' || member.role === 'outer',
+                        role: member.role,
+                        isVerySmall: false,
+                    } satisfies MapPolygon);
+                }
+            }
+        }
+
+        mergePolygonsInPlace(polygons);
+        relationPolygons.push(...polygons);
+    }
+
+    return [...wayPolygons, ...relationPolygons];
 };
 
 const mergePolygonsInPlace = (polygons: MapPolygon[]) => {
@@ -240,13 +281,26 @@ const calculateGeometryCenter = (geometry: LatLngTuple[]): LatLngTuple => {
     return [latSum / geometry.length, lonSum / geometry.length];
 };
 
-type Marker = {
+const getMapPolygonFromWay = (way: OSMWay, geometry: LatLngTuple[]) =>
+    ({
+        id: way.id,
+        geometry,
+        tags: way.tags ?? {},
+        isClosed: way.nodes && way.nodes.length >= 2 ? way.nodes[0] === way.nodes[way.nodes.length - 1] : false,
+        isVerySmall:
+            way.bounds &&
+            Math.abs(way.bounds.maxlat - way.bounds.minlat) < 0.0005 &&
+            Math.abs(way.bounds.maxlon - way.bounds.minlon) < 0.0005,
+    }) satisfies MapPolygon;
+
+type MapMarker = {
     lat: number;
     lon: number;
     tags: Record<string, string>;
 };
 
 type MapPolygon = {
+    id?: number;
     geometry: LatLngTuple[];
     tags: Record<string, string>;
     isClosed: boolean;
@@ -256,10 +310,12 @@ type MapPolygon = {
 
 type OSMNode = {
     type: 'node';
-    id: number;
+    id?: number;
+    ref?: number;
     lat: number;
     lon: number;
     tags?: Record<string, string>;
+    role?: string;
 };
 
 type OSMWay = {
@@ -281,7 +337,7 @@ type OSMRelation = {
     type: 'relation';
     id: number;
     bounds: OSMBounds;
-    members: OSMWay[];
+    members: (OSMWay | OSMNode)[];
     tags?: Record<string, string>;
 };
 

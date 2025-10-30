@@ -4,9 +4,9 @@ import { useAgentChat } from 'agents/ai-react';
 import type { UIMessage } from 'ai';
 import { ChatInput } from '@/client/components/ChatInput.tsx';
 import { Chat } from '@/client/components/Chat.tsx';
-import type { MapElement } from '@/client/components/ResultMap.tsx';
+import type { OSMElement } from '@/client/components/ResultMap.tsx';
 
-type AgentState = Record<string, MapElement[]>;
+type AgentState = Record<string, OSMElement[]>;
 
 export const App: React.FC = () => {
     const [overpassResults, setOverpassResults] = useState<AgentState>({});
