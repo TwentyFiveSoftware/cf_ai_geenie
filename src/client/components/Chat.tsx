@@ -2,26 +2,28 @@ import React from 'react';
 import type { ToolUIPart, UIMessage } from 'ai';
 import { type MapElement, ResultMap } from '@/client/components/ResultMap.tsx';
 import { CircleAlert, CircleCheckIcon, CircleQuestionMarkIcon, DotIcon, LoaderCircleIcon } from 'lucide-react';
-import { cn } from '@/lib/utils.ts';
 
 type Props = {
     messages: UIMessage[];
+    overpassResults: Record<string, MapElement[]>;
     isWaitingForResponse: boolean;
 };
 
-export const Chat: React.FC<Props> = ({ messages, isWaitingForResponse }) => {
+export const Chat: React.FC<Props> = ({ messages, overpassResults, isWaitingForResponse }) => {
     return (
         <div className="flex flex-col gap-8 mb-10">
             {messages.map(message => {
                 switch (message.role) {
                     case 'user':
-                        return <UserMessage message={message} key={message.id} />;
+                        return <UserMessage key={message.id} message={message} />;
 
                     case 'assistant':
-                        return <AssistantMessage message={message} key={message.id} />;
+                        return (
+                            <AssistantMessage key={message.id} message={message} overpassResults={overpassResults} />
+                        );
 
                     case 'system':
-                        return <></>;
+                        return <React.Fragment key={message.id} />;
                 }
             })}
 
@@ -43,7 +45,10 @@ const UserMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
     );
 };
 
-const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
+const AssistantMessage: React.FC<{ message: UIMessage; overpassResults: Record<string, MapElement[]> }> = ({
+    message,
+    overpassResults,
+}) => {
     return (
         <div className="w-full grid gap-3">
             {message.parts.map((part, index) => {
@@ -67,7 +72,7 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
 
                                 {part.state === 'output-available' && (
                                     <div className="mt-5 mb-2">
-                                        <ResultMap elements={(part.output as { elements: MapElement[] }).elements} />
+                                        <ResultMap elements={overpassResults[part.toolCallId] ?? []} />
                                     </div>
                                 )}
                             </div>
@@ -89,9 +94,9 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
                             <ToolMessagePart
                                 key={part.toolCallId}
                                 part={part}
-                                runningStateText="Searching OpenStreetMap Wiki for suitable tags..."
-                                successStateText="Found suitable tags in the OpenStreetMap Wiki"
-                                errorStateText="OpenStreetMap Wiki search resulted in an error"
+                                runningStateText="Searching OpenStreetMap wiki for suitable tags..."
+                                successStateText="Found suitable tags in the OpenStreetMap wiki"
+                                errorStateText="OpenStreetMap wiki search resulted in an error"
                             />
                         );
 

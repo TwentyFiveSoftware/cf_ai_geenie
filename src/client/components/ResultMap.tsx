@@ -27,26 +27,26 @@ const MapLayers: React.FC<{ elements: MapElement[] }> = ({ elements }) => {
     const markers = elements
         .map<Marker | null>(element => {
             if (element.type === 'node') {
-                return { lat: element.lat, lon: element.lon, tags: element.tags } satisfies Marker;
+                return { lat: element.lat, lon: element.lon, tags: element.tags ?? {} } satisfies Marker;
             }
 
-            if (element.type === 'way' && !element.geometry) {
-                if (element.center) {
-                    return {
-                        lat: element.center.lat,
-                        lon: element.center.lon,
-                        tags: element.tags ?? {},
-                    } satisfies Marker;
-                }
-
-                if (element.bounds) {
-                    return {
-                        lat: (element.bounds.minlat + element.bounds.maxlat) / 2,
-                        lon: (element.bounds.minlon + element.bounds.maxlon) / 2,
-                        tags: element.tags ?? {},
-                    } satisfies Marker;
-                }
-            }
+            // if (element.type === 'way' && !element.geometry) {
+            //     if (element.center) {
+            //         return {
+            //             lat: element.center.lat,
+            //             lon: element.center.lon,
+            //             tags: element.tags ?? {},
+            //         } satisfies Marker;
+            //     }
+            //
+            //     if (element.bounds) {
+            //         return {
+            //             lat: (element.bounds.minlat + element.bounds.maxlat) / 2,
+            //             lon: (element.bounds.minlon + element.bounds.maxlon) / 2,
+            //             tags: element.tags ?? {},
+            //         } satisfies Marker;
+            //     }
+            // }
 
             return null;
         })
@@ -254,7 +254,7 @@ type OSMNode = {
     id: number;
     lat: number;
     lon: number;
-    tags: Record<string, string>;
+    tags?: Record<string, string>;
 };
 
 type OSMWay = {
@@ -277,7 +277,7 @@ type OSMRelation = {
     id: number;
     bounds: OSMBounds;
     members: OSMWay[];
-    tags: Record<string, string>;
+    tags?: Record<string, string>;
 };
 
 type OSMBounds = {

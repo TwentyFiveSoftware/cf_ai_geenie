@@ -14,7 +14,9 @@ import { CrawlOpenStreetMapWikiTagsWorkflow } from './workflows/crawlOpenStreetM
 
 const model = openai('gpt-4.1');
 
-export class GeenieAgent extends AIChatAgent<Env> {
+type OverpassResults = Record<string, unknown>;
+
+export class GeenieAgent extends AIChatAgent<Env, OverpassResults> {
     private static readonly SYSTEM_PROMPT: string = `
 You are Geenie, a helpful assistant and map data expert.
 Your ultimate goal is to convert a user's natural-language request into an Overpass QL query and execute it.
@@ -35,6 +37,8 @@ Give a very short summary of the result, or highlight a handful of places.
 Do not use markdown formatting.
 `.trim();
 
+    initialState = {} satisfies OverpassResults;
+
     async onChatMessage(
         onFinish: StreamTextOnFinishCallback<ToolSet>,
         options?: {
@@ -47,7 +51,12 @@ Do not use markdown formatting.
             model,
             tools: {
                 nominatimLocationSearch,
-                executeOverpassQuery,
+                executeOverpassQuery: executeOverpassQuery((toolCallId, result) =>
+                    this.setState({
+                        ...this.state,
+                        [toolCallId]: result,
+                    }),
+                ),
                 mapFeatureWikiRAG: mapFeatureWikiRAG(this.env),
             },
             onFinish,

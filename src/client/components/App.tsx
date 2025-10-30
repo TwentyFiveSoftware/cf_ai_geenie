@@ -1,19 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAgent } from 'agents/react';
 import { useAgentChat } from 'agents/ai-react';
 import type { UIMessage } from 'ai';
 import { ChatInput } from '@/client/components/ChatInput.tsx';
 import { Chat } from '@/client/components/Chat.tsx';
+import type { MapElement } from '@/client/components/ResultMap.tsx';
+
+type AgentState = Record<string, MapElement[]>;
 
 export const App: React.FC = () => {
-    const agent = useAgent({
+    const [overpassResults, setOverpassResults] = useState<AgentState>({});
+
+    const agent = useAgent<AgentState>({
         agent: 'geenie-agent',
         name: 'session-12345', // TODO
+        onStateUpdate: results => setOverpassResults(results),
         onOpen: () => console.log('Connection to Geenie established'),
         onClose: () => console.log('Connection to Geenie closed'),
     });
 
-    const agentChat = useAgentChat<unknown, UIMessage>({ agent });
+    const agentChat = useAgentChat<AgentState, UIMessage>({ agent });
 
     const isAgentReadyForNextMessage = agentChat.status === 'ready';
 
@@ -30,6 +36,7 @@ export const App: React.FC = () => {
 
     const clearHistory = async () => {
         agentChat.clearHistory();
+        agent.setState({});
     };
 
     if (agentChat.messages.length === 0) {
@@ -63,7 +70,11 @@ export const App: React.FC = () => {
                         Geenie<span className="text-primary">.</span>
                     </h1>
 
-                    <Chat messages={agentChat.messages} isWaitingForResponse={agentChat.status === 'submitted'} />
+                    <Chat
+                        messages={agentChat.messages}
+                        overpassResults={overpassResults}
+                        isWaitingForResponse={agentChat.status === 'submitted'}
+                    />
                 </div>
             </div>
 

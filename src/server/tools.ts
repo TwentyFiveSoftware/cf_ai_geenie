@@ -1,37 +1,45 @@
 import { z } from 'zod';
 import type { Tool } from 'ai';
 
-export const executeOverpassQuery = {
-    description: `
+export const executeOverpassQuery = (storeResultInState: (toolCallId: string, result: unknown) => void) =>
+    ({
+        description: `
 Executes an OpenStreetMap Overpass QL query using the public Overpass API.
 Use this tool to retrieve geographic and map-related data — such as roads, buildings, amenities, or other OpenStreetMap features.
 The input **must** be a valid Overpass QL query string that includes an output directive of \`[out:json]\`.
 `.trim(),
-    inputSchema: z.object({ query: z.string().describe('A valid Overpass QL query as a string.') }),
-    execute: async ({ query }) => {
-        console.log('"executeOverpassQuery"', query);
+        inputSchema: z.object({ query: z.string().describe('A valid Overpass QL query as a string.') }),
+        execute: async ({ query }, { toolCallId }) => {
+            console.log('"executeOverpassQuery"', query);
 
-        for (let retry = 0; retry < 3; retry++) {
-            const result = await fetch('https://overpass-api.de/api/interpreter', {
-                method: 'POST',
-                body: `data=${encodeURIComponent(query)}`,
-            });
+            for (let retry = 0; retry < 3; retry++) {
+                const result = await fetch('https://overpass-api.de/api/interpreter', {
+                    method: 'POST',
+                    body: `data=${encodeURIComponent(query)}`,
+                });
 
-            // retry if the API is too busy
-            if (result.status === 504) {
-                continue;
+                // retry if the API is too busy
+                if (result.status === 504) {
+                    continue;
+                }
+
+                if (result.status !== 200) {
+                    throw new Error(
+                        `Overpass query resulted in an error (HTTP ${result.status}): ${await result.text()}`,
+                    );
+                }
+
+                const jsonResult = (await result.json()) as { elements: unknown[] };
+                storeResultInState(toolCallId, jsonResult.elements);
+
+                return `Overpass query returned ${jsonResult.elements.length} results.`;
             }
 
-            if (result.status !== 200) {
-                throw new Error(`Overpass query resulted in an error: HTTP ${result.status}`);
-            }
-
-            return await result.json();
-        }
-
-        throw new Error(`Overpass API is too busy`);
-    },
-} satisfies Tool<{ query: string }, unknown>;
+            throw new Error(
+                `Overpass API is too busy at the moment (tried multiple times but all tries failed with HTTP 504)`,
+            );
+        },
+    }) satisfies Tool<{ query: string }, unknown>;
 
 export const nominatimLocationSearch = {
     description: `
@@ -53,7 +61,7 @@ Examples: "Amsterdam", "Time Square, New York"
         );
 
         if (result.status !== 200) {
-            throw new Error(`Nominatim query resulted in an error: HTTP ${result.status}`);
+            throw new Error(`Nominatim query resulted in an error (HTTP ${result.status}): ${await result.text()}`);
         }
 
         return await result.json();
@@ -82,14 +90,14 @@ These key-value pairs are important for generating Overpass QL queries to actual
                 returnValues: false,
             });
 
-            return matches.map((match: { metadata: { key: string; value: string; description: string } }) =>
-                match.metadata
-                    ? {
+            return matches.map(match =>
+                !match.metadata
+                    ? null
+                    : {
                           key: match.metadata.key,
                           value: match.metadata.value,
                           description: match.metadata.description,
-                      }
-                    : null,
+                      },
             );
         },
     }) satisfies Tool<{ mapFeature: string }, unknown>;
