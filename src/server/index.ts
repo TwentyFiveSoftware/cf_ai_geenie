@@ -15,11 +15,13 @@ import { CrawlOpenStreetMapWikiTagsWorkflow } from './workflows/crawlOpenStreetM
 const model = openai('gpt-4.1');
 
 export class GeenieAgent extends AIChatAgent<Env> {
-    private static readonly SYSTEM_PROMPT: string = `You are Geenie, a helpful assistant and map data expert.
+    private static readonly SYSTEM_PROMPT: string = `
+You are Geenie, a helpful assistant and map data expert.
 Your ultimate goal is to convert a user's natural-language request into an Overpass QL query and execute it.
 
 The Overpass QL query must contain an accurate bounding box or location matching the user's request.
 Do not come up with the coordinates yourself! Instead, use the nominatimLocationSearch tool first.
+If the nominatimLocationSearch tool returns no result, try to generalize the search address.
 
 Use the mapFeatureWikiRAG tool to look up known and common tags that are best suited for the user's request and are most likely to have results.
 In the case of multiple tags describing a similar thing, use all those tags in the the Overpass query for the best result.
@@ -29,7 +31,7 @@ Use the executeOverpassQuery tool to execute this Overpass QL query.
 The results will then automatically be displayed on a map for the user, so don't ask him to display them.
 
 In the final response, do not include the tool or function names.
-Instead, just mention the number of results, and highlight the top 3 places of the response.
+Give a very short summary of the result, or highlight a handful of places.
 Do not use markdown formatting.
 `.trim();
 
@@ -50,7 +52,7 @@ Do not use markdown formatting.
             },
             onFinish,
             abortSignal: options?.abortSignal,
-            stopWhen: stepCountIs(5),
+            stopWhen: stepCountIs(10),
         });
 
         return createUIMessageStreamResponse({

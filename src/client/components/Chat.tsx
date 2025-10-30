@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ToolUIPart, UIMessage } from 'ai';
-import { type OSMNode, ResultMap } from '@/client/components/ResultMap.tsx';
+import { type MapElement, ResultMap } from '@/client/components/ResultMap.tsx';
 import { CircleAlert, CircleCheckIcon, CircleQuestionMarkIcon, DotIcon, LoaderCircleIcon } from 'lucide-react';
 import { cn } from '@/lib/utils.ts';
 
@@ -45,7 +45,7 @@ const UserMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
 
 const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
     return (
-        <div className="w-full">
+        <div className="w-full grid gap-3">
             {message.parts.map((part, index) => {
                 switch (part.type) {
                     case 'text':
@@ -55,14 +55,10 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
                             </div>
                         );
 
-                    case 'step-start':
-                        return <div key={index} className={cn(index > 0 && 'mb-2')} />;
-
                     case 'tool-executeOverpassQuery':
                         return (
-                            <>
+                            <div key={part.toolCallId}>
                                 <ToolMessagePart
-                                    key={part.toolCallId}
                                     part={part}
                                     runningStateText="Executing Overpass query..."
                                     successStateText="Overpass query executed"
@@ -70,14 +66,11 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
                                 />
 
                                 {part.state === 'output-available' && (
-                                    <div className="my-5">
-                                        <ResultMap
-                                            key={part.toolCallId}
-                                            elements={(part.output as { elements: OSMNode[] }).elements}
-                                        />
+                                    <div className="mt-5 mb-2">
+                                        <ResultMap elements={(part.output as { elements: MapElement[] }).elements} />
                                     </div>
                                 )}
-                            </>
+                            </div>
                         );
 
                     case 'tool-nominatimLocationSearch':
@@ -86,10 +79,24 @@ const AssistantMessage: React.FC<{ message: UIMessage }> = ({ message }) => {
                                 key={part.toolCallId}
                                 part={part}
                                 runningStateText="Executing Nominatim location search query..."
-                                successStateText="Nominatim location search completed"
+                                successStateText="Retrieved location coordiantes using Nominatim"
                                 errorStateText="Nominatim location search resulted in an error"
                             />
                         );
+
+                    case 'tool-mapFeatureWikiRAG':
+                        return (
+                            <ToolMessagePart
+                                key={part.toolCallId}
+                                part={part}
+                                runningStateText="Searching OpenStreetMap Wiki for suitable tags..."
+                                successStateText="Found suitable tags in the OpenStreetMap Wiki"
+                                errorStateText="OpenStreetMap Wiki search resulted in an error"
+                            />
+                        );
+
+                    case 'step-start':
+                        return <React.Fragment key={index} />;
 
                     default:
                         return (
