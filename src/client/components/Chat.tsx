@@ -2,6 +2,7 @@ import React from 'react';
 import type { ToolUIPart, UIMessage } from 'ai';
 import { type MapElement, ResultMap } from '@/client/components/ResultMap.tsx';
 import { CircleAlert, CircleCheckIcon, CircleQuestionMarkIcon, DotIcon, LoaderCircleIcon } from 'lucide-react';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible.tsx';
 
 type Props = {
     messages: UIMessage[];
@@ -138,20 +139,45 @@ const ToolMessagePart: React.FC<{
 
         case 'output-error':
             icon = <CircleAlert className="stroke-destructive" />;
-            text = (
-                <div className="text-destructive">
-                    <span>
-                        {errorStateText}: {part.errorText}
-                    </span>
-                    <code className="block font-mono mt-3">{JSON.stringify(part.input)}</code>
-                </div>
-            );
+            text = <div className="text-destructive">{errorStateText}</div>;
             break;
     }
 
+    const toolInput = !part.input ? null : JSON.stringify(part.input, null, 2);
+    const toolOutput = !part.output ? null : JSON.stringify(part.output, null, 2);
+
     return (
-        <div className="flex gap-3">
-            {icon} {text}
-        </div>
+        <Collapsible>
+            <CollapsibleTrigger>
+                <div className="flex gap-3 cursor-pointer">
+                    {icon} {text}
+                </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+                <div className="pl-8">
+                    <div className="border rounded-xl w-full p-5 mt-2 mb-5">
+                        {toolInput && (
+                            <>
+                                <div className="mb-3 text-muted-foreground">Tool Input</div>
+                                <code className="w-full p-4 bg-muted rounded-xl block font-mono break-words whitespace-pre-wrap">
+                                    {toolInput}
+                                </code>
+                            </>
+                        )}
+
+                        {toolInput && toolOutput && <div className="mb-6" />}
+
+                        {toolOutput && (
+                            <>
+                                <div className="mb-3 text-muted-foreground">Tool Output</div>
+                                <code className="w-full p-4 bg-muted rounded-xl block font-mono break-words whitespace-pre-wrap">
+                                    {toolOutput}
+                                </code>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </CollapsibleContent>
+        </Collapsible>
     );
 };
