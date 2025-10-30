@@ -10,8 +10,6 @@ The input **must** be a valid Overpass QL query string that includes an output d
 `.trim(),
         inputSchema: z.object({ query: z.string().describe('A valid Overpass QL query as a string.') }),
         execute: async ({ query }, { toolCallId }) => {
-            console.log('"executeOverpassQuery"', query);
-
             for (let retry = 0; retry < 3; retry++) {
                 const result = await fetch('https://overpass-api.de/api/interpreter', {
                     method: 'POST',
@@ -25,7 +23,7 @@ The input **must** be a valid Overpass QL query string that includes an output d
 
                 if (result.status !== 200) {
                     throw new Error(
-                        `Overpass query resulted in an error (HTTP ${result.status}): ${await result.text()}`,
+                        `Overpass query resulted in an error (HTTP ${result.status}):\n\n${await result.text()}`,
                     );
                 }
 
@@ -36,7 +34,7 @@ The input **must** be a valid Overpass QL query string that includes an output d
             }
 
             throw new Error(
-                `Overpass API is too busy at the moment (tried multiple times but all tries failed with HTTP 504)`,
+                `Overpass API is too busy at the moment (tried multiple times, but all attempts failed with HTTP 504)`,
             );
         },
     }) satisfies Tool<{ query: string }, unknown>;
@@ -49,8 +47,6 @@ Examples: "Amsterdam", "Time Square, New York"
 `.trim(),
     inputSchema: z.object({ search: z.string().describe('postal address') }),
     execute: async ({ search }) => {
-        console.log('"nominatimLocationSearch"', search);
-
         const result = await fetch(
             `https://nominatim.openstreetmap.org/search?polygon_geojson=0&limit=3&format=jsonv2&q=${encodeURIComponent(search)}`,
             {
@@ -61,7 +57,7 @@ Examples: "Amsterdam", "Time Square, New York"
         );
 
         if (result.status !== 200) {
-            throw new Error(`Nominatim query resulted in an error (HTTP ${result.status}): ${await result.text()}`);
+            throw new Error(`Nominatim query resulted in an error (HTTP ${result.status}):\n\n${await result.text()}`);
         }
 
         return await result.json();
@@ -78,8 +74,6 @@ These key-value pairs are important for generating Overpass QL queries to actual
             mapFeature: z.string().describe('desired map feature for which to look up valid tags'),
         }),
         execute: async ({ mapFeature }) => {
-            console.log('"mapFeatureWikiRAG"', mapFeature);
-
             const embedding = await env.AI.run('@cf/baai/bge-base-en-v1.5', { text: mapFeature });
             const vector = (embedding as { data: number[][] }).data[0]; // shape: [1, 768]
 

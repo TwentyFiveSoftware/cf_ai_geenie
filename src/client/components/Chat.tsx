@@ -155,25 +155,32 @@ const ToolMessagePart: React.FC<{
             </CollapsibleTrigger>
             <CollapsibleContent>
                 <div className="pl-8">
-                    <div className="border rounded-xl w-full p-5 mt-2 mb-5">
+                    <div className="border rounded-xl w-full p-5 mt-2 mb-5 grid gap-6">
                         {toolInput && (
-                            <>
+                            <div>
                                 <div className="mb-3 text-muted-foreground">Tool Input</div>
                                 <code className="w-full p-4 bg-muted rounded-xl block font-mono break-words whitespace-pre-wrap">
                                     {toolInput}
                                 </code>
-                            </>
+                            </div>
                         )}
 
-                        {toolInput && toolOutput && <div className="mb-6" />}
-
                         {toolOutput && (
-                            <>
+                            <div>
                                 <div className="mb-3 text-muted-foreground">Tool Output</div>
                                 <code className="w-full p-4 bg-muted rounded-xl block font-mono break-words whitespace-pre-wrap">
                                     {toolOutput}
                                 </code>
-                            </>
+                            </div>
+                        )}
+
+                        {part.errorText && (
+                            <div>
+                                <div className="mb-3 text-muted-foreground">Tool Error</div>
+                                <code className="w-full p-4 bg-muted rounded-xl block font-mono break-words whitespace-pre-wrap">
+                                    {part.errorText}
+                                </code>
+                            </div>
                         )}
                     </div>
                 </div>
