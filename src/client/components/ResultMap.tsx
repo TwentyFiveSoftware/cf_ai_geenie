@@ -149,13 +149,18 @@ const MapLayers: React.FC<{ elements: MapElement[] }> = ({ elements }) => {
 const MapPopup: React.FC<{ tags: Record<string, string> }> = ({ tags }) => {
     return (
         <Popup>
-            <ul>
-                {Object.entries(tags).map(([key, value]) => (
-                    <li key={key}>
-                        <b>{key}</b>: {value}
-                    </li>
-                ))}
-            </ul>
+            <div className="py-1">
+                {'name' in tags && <div className="text-lg font-bold mb-3 leading-[1.1]">{tags.name}</div>}
+
+                <div className="w-full grid gap-x-3 gap-y-1 grid-cols-[minmax(auto,_50%)_1fr] items-center">
+                    {Object.entries(tags).map(([key, value]) => (
+                        <React.Fragment key={key}>
+                            <div className="break-words whitespace-normal leading-3 font-bold">{key}</div>
+                            <div className="break-words whitespace-normal leading-3 min-w-[150px]">{value}</div>
+                        </React.Fragment>
+                    ))}
+                </div>
+            </div>
         </Popup>
     );
 };
