@@ -48,7 +48,7 @@ Examples: "Amsterdam", "Time Square, New York"
     inputSchema: z.object({ search: z.string().describe('postal address') }),
     execute: async ({ search }) => {
         const result = await fetch(
-            `https://nominatim.openstreetmap.org/search?polygon_geojson=0&limit=3&format=jsonv2&q=${encodeURIComponent(search)}`,
+            `https://nominatim.openstreetmap.org/search?polygon_geojson=0&limit=1&format=jsonv2&q=${encodeURIComponent(search)}`,
             {
                 headers: {
                     'User-Agent': 'curl',

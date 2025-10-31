@@ -49,23 +49,20 @@ const MapLayers: React.FC<{ elements: OSMElement[] }> = ({ elements }) => {
                 </Marker>
             ))}
 
-            {polygons
-                .filter(polygon => polygon.isClosed)
-                .map((polygon, index) => (
-                    <Polygon key={index} pathOptions={{ color: 'red' }} positions={polygon.geometry}>
-                        <MapPopup tags={polygon.tags} />
-                    </Polygon>
-                ))}
-
-            {polygons
-                .filter(polygon => !polygon.isClosed)
-                .map((polygon, index) => (
+            {polygons.map((polygon, index) => {
+                return (
                     <React.Fragment key={index}>
-                        <Polyline pathOptions={{ color: 'black', weight: 7 }} positions={polygon.geometry}>
-                            <MapPopup tags={polygon.tags} />
-                        </Polyline>
+                        {polygon.isClosed ? (
+                            <Polygon key={index} pathOptions={{ color: 'red' }} positions={polygon.geometry}>
+                                <MapPopup tags={polygon.tags} />
+                            </Polygon>
+                        ) : (
+                            <Polyline pathOptions={{ color: 'black', weight: 7 }} positions={polygon.geometry}>
+                                <MapPopup tags={polygon.tags} />
+                            </Polyline>
+                        )}
 
-                        {polygon.isVerySmall && (
+                        {isSmallPolygon(polygon) && (
                             <CircleMarker
                                 pathOptions={{ color: 'blue', weight: 2 }}
                                 center={calculateGeometryCenter(polygon.geometry)}
@@ -75,7 +72,8 @@ const MapLayers: React.FC<{ elements: OSMElement[] }> = ({ elements }) => {
                             </CircleMarker>
                         )}
                     </React.Fragment>
-                ))}
+                );
+            })}
         </>
     );
 };
@@ -174,7 +172,6 @@ const buildPolygons = (elements: OSMElement[]): MapPolygon[] => {
                         tags: relation.tags ?? member.tags ?? {},
                         isClosed: member.role === 'inner' || member.role === 'outer',
                         role: member.role,
-                        isVerySmall: false,
                     } satisfies MapPolygon);
                 } else if (member.ref) {
                     // find way based on id
@@ -193,7 +190,6 @@ const buildPolygons = (elements: OSMElement[]): MapPolygon[] => {
                         tags: relation.tags ?? member.tags ?? wayPolygon.tags,
                         isClosed: member.role === 'inner' || member.role === 'outer',
                         role: member.role,
-                        isVerySmall: false,
                     } satisfies MapPolygon);
                 }
             }
@@ -287,11 +283,20 @@ const getMapPolygonFromWay = (way: OSMWay, geometry: LatLngTuple[]) =>
         geometry,
         tags: way.tags ?? {},
         isClosed: way.nodes && way.nodes.length >= 2 ? way.nodes[0] === way.nodes[way.nodes.length - 1] : false,
-        isVerySmall:
-            way.bounds &&
-            Math.abs(way.bounds.maxlat - way.bounds.minlat) < 0.0005 &&
-            Math.abs(way.bounds.maxlon - way.bounds.minlon) < 0.0005,
     }) satisfies MapPolygon;
+
+const isSmallPolygon = (polygon: MapPolygon): boolean => {
+    const latitudes = polygon.geometry.map(point => point[0]);
+    const longitudes = polygon.geometry.map(point => point[1]);
+
+    const minLat = Math.min(...latitudes);
+    const maxLat = Math.max(...latitudes);
+
+    const minLon = Math.min(...longitudes);
+    const maxLon = Math.max(...longitudes);
+
+    return Math.abs(maxLat - minLat) < 0.0005 && Math.abs(maxLon - minLon) < 0.0005;
+};
 
 type MapMarker = {
     lat: number;
@@ -305,7 +310,6 @@ type MapPolygon = {
     tags: Record<string, string>;
     isClosed: boolean;
     role?: 'outer' | 'inner' | string;
-    isVerySmall?: boolean;
 };
 
 type OSMNode = {

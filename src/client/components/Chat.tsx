@@ -159,7 +159,7 @@ const ToolMessagePart: React.FC<{
                         {toolInput && (
                             <div>
                                 <div className="mb-3 text-muted-foreground">Tool Input</div>
-                                <code className="w-full p-4 bg-muted rounded-xl block font-mono break-words whitespace-pre-wrap">
+                                <code className="w-full p-4 bg-muted rounded-xl block font-mono break-all whitespace-pre-wrap">
                                     {toolInput}
                                 </code>
                             </div>
@@ -168,7 +168,7 @@ const ToolMessagePart: React.FC<{
                         {toolOutput && (
                             <div>
                                 <div className="mb-3 text-muted-foreground">Tool Output</div>
-                                <code className="w-full p-4 bg-muted rounded-xl block font-mono break-words whitespace-pre-wrap">
+                                <code className="w-full p-4 bg-muted rounded-xl block font-mono break-all whitespace-pre-wrap">
                                     {toolOutput}
                                 </code>
                             </div>
@@ -177,7 +177,7 @@ const ToolMessagePart: React.FC<{
                         {part.errorText && (
                             <div>
                                 <div className="mb-3 text-muted-foreground">Tool Error</div>
-                                <code className="w-full p-4 bg-muted rounded-xl block font-mono break-words whitespace-pre-wrap">
+                                <code className="w-full p-4 bg-muted rounded-xl block font-mono break-all whitespace-pre-wrap">
                                     {part.errorText}
                                 </code>
                             </div>

@@ -33,7 +33,7 @@ Use the executeOverpassQuery tool to execute this Overpass QL query.
 The results will then automatically be displayed on a map for the user, so don't ask him to display them.
 
 In the final response, do not include the tool or function names.
-Give a very short summary of the result, or highlight a handful of places.
+Give a very short summary of the result, such as mentioning the type, the size of the area or radius, and the number of places found.
 Do not use markdown formatting.
 `.trim();
 
