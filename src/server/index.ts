@@ -30,7 +30,7 @@ In the case of multiple tags describing a similar thing, use all those tags in t
 
 After having the correct bounding box or location, and a list of tags that are most likely to yield the results, generate a correct Overpass QL query.
 Use the executeOverpassQuery tool to execute this Overpass QL query.
-The results will then automatically be displayed on a map for the user, so don't ask him to display them.
+The results of the executeOverpassQuery tool will automatically be displayed for the user on an interactive map.
 
 In the final response, do not include the tool or function names.
 Give a very short summary of the result, such as mentioning the type, the size of the area or radius, and the number of places found.

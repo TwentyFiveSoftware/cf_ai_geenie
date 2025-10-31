@@ -1,25 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAgent } from 'agents/react';
 import { useAgentChat } from 'agents/ai-react';
 import type { UIMessage } from 'ai';
+import { v4 as uuidv4 } from 'uuid';
 import { ChatInput } from '@/client/components/ChatInput.tsx';
 import { Chat } from '@/client/components/Chat.tsx';
 import type { OSMElement } from '@/client/components/ResultMap.tsx';
 
 type AgentState = Record<string, OSMElement[]>;
 
+const LOCAL_STORAGE_SESSION_KEY = 'geenie-session-id';
+
 export const App: React.FC = () => {
     const [overpassResults, setOverpassResults] = useState<AgentState>({});
 
     const agent = useAgent<AgentState>({
         agent: 'geenie-agent',
-        name: 'session-12345', // TODO
+        name: localStorage.getItem(LOCAL_STORAGE_SESSION_KEY) ?? uuidv4(),
         onStateUpdate: results => setOverpassResults(results),
         onOpen: () => console.log('Connection to Geenie established'),
         onClose: () => console.log('Connection to Geenie closed'),
     });
 
     const agentChat = useAgentChat<AgentState, UIMessage>({ agent });
+
+    useEffect(() => {
+        localStorage.setItem(LOCAL_STORAGE_SESSION_KEY, agent.name);
+    }, [agent]);
 
     const isAgentReadyForNextMessage = agentChat.status === 'ready';
 
@@ -82,7 +89,7 @@ export const App: React.FC = () => {
                 <div className="w-full max-w-[750px]">
                     <ChatInput sendChatMessage={sendChatMessage} />
 
-                    <div className="text-xs ml-5 mt-2 text-center w-full inline-block">
+                    <div className="text-xs mt-2 text-center w-full inline-block">
                         or start over with{' '}
                         <a className="underline cursor-pointer hover:text-primary" onClick={() => clearHistory()}>
                             new chat
