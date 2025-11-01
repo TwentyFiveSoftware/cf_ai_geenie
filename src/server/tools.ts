@@ -64,10 +64,10 @@ Examples: "Amsterdam", "Time Square, New York"
     },
 } satisfies Tool<{ search: string }, unknown>;
 
-export const mapFeatureWikiRAG = (env: Env) =>
+export const retrieveOpenStreetMapsTagsFromKnowledgeBase = (env: Env) =>
     ({
         description: `
-Retrieve information from the OpenStreetMap wiki about the most common map features (i.e. tags with key and values) alongside their descriptions.
+Retrieve information from the OpenStreetMap wiki about the most common map features (i.e. OpenStreetMap tags with key, values, and descriptions).
 These key-value pairs are important for generating Overpass QL queries to actually return the desired map features.
 `.trim(),
         inputSchema: z.object({
@@ -78,20 +78,12 @@ These key-value pairs are important for generating Overpass QL queries to actual
             const vector = (embedding as { data: number[][] }).data[0]; // shape: [1, 768]
 
             const { matches } = await env.VECTORIZE.query(vector, {
-                namespace: 'map_features',
-                topK: 3,
+                namespace: 'tags',
+                topK: 5,
                 returnMetadata: 'all',
                 returnValues: false,
             });
 
-            return matches.map(match =>
-                !match.metadata
-                    ? null
-                    : {
-                          key: match.metadata.key,
-                          value: match.metadata.value,
-                          description: match.metadata.description,
-                      },
-            );
+            return matches.map(match => match.metadata);
         },
     }) satisfies Tool<{ mapFeature: string }, unknown>;

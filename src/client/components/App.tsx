@@ -53,7 +53,7 @@ export const App: React.FC = () => {
                     <h1 className="text-5xl font-bold text-center mb-2 text-blue-400">
                         Geenie<span className="text-primary">.</span>
                     </h1>
-                    <div className="mb-10 text-center text-muted-foreground grid justify-items-center">
+                    <div className="mb-10 text-center grid justify-items-center">
                         <div className="w-[80%]">
                             Explore the world through words — ask Geenie for any place, landmark, or point of interest,
                             and watch it appear.
@@ -61,13 +61,26 @@ export const App: React.FC = () => {
                     </div>
 
                     <ChatInput sendChatMessage={sendChatMessage} />
+
+                    <div className="text-xs mt-4 text-center w-full inline-block text-muted-foreground">
+                        Important: The chat is shared with OpenAI. DO NOT enter personal or sensitive information!
+                        <br />
+                        More details on and usage policy on the{' '}
+                        <a
+                            href="https://github.com/TwentyFiveSoftware/cf_ai_geenie"
+                            className="underline cursor-pointer hover:text-primary"
+                        >
+                            GitHub page
+                        </a>
+                        .
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="w-full h-svh grid grid-rows-[1fr_120px]">
+        <div className="w-full h-svh grid grid-rows-[1fr_150px]">
             <div
                 className="overflow-auto grid justify-items-center p-4"
                 style={{ scrollbarGutter: 'stable both-edges' }}
@@ -90,11 +103,21 @@ export const App: React.FC = () => {
                     <ChatInput sendChatMessage={sendChatMessage} />
 
                     <div className="text-xs mt-2 text-center w-full inline-block">
-                        or start over with{' '}
+                        Or delete this conversation and start over with a{' '}
                         <a className="underline cursor-pointer hover:text-primary" onClick={() => clearHistory()}>
                             new chat
                         </a>
-                        , deleting this conversation.
+                        .
+                        <br />
+                        Important: The chat is shared with OpenAI. DO NOT enter personal or sensitive information
+                        More details on the{' '}
+                        <a
+                            href="https://github.com/TwentyFiveSoftware/cf_ai_geenie"
+                            className="underline cursor-pointer hover:text-primary"
+                        >
+                            GitHub page
+                        </a>
+                        .
                     </div>
                 </div>
             </div>

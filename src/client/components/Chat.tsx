@@ -90,7 +90,7 @@ const AssistantMessage: React.FC<{ message: UIMessage; overpassResults: Record<s
                             />
                         );
 
-                    case 'tool-mapFeatureWikiRAG':
+                    case 'tool-retrieveOpenStreetMapsTagsFromKnowledgeBase':
                         return (
                             <ToolMessagePart
                                 key={part.toolCallId}

@@ -5,6 +5,9 @@
     "compatibility_flags": [
         "nodejs_compat"
     ],
+    "observability": {
+        "enabled": true
+    },
     "ai": {
         "binding": "AI",
         "remote": true
@@ -34,22 +37,17 @@
             "remote": true
         }
     ],
-    "d1_databases": [
-        {
-            "binding": "prod_openstreetmap_wiki_tags",
-            "database_name": "prod-openstreetmap-wiki-tags",
-            "database_id": "b42ed127-810a-4941-91f4-a1f54a4e34ab",
-            "remote": true
-        }
-    ],
-    "observability": {
-        "enabled": true
-    },
     "workflows": [
         {
             "name": "crawl-openstreetmap-wiki-tags",
             "binding": "CRAWL_OPENSTREETMAP_WIKI_TAGS",
             "class_name": "CrawlOpenStreetMapWikiTagsWorkflow"
         }
-    ]
+    ],
+    "browser": {
+        "binding": "BROWSER"
+    }
+    //    "limits": {
+    //        "cpu_ms": 300000
+    //    }
 }

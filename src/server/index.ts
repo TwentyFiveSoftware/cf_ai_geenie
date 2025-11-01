@@ -9,7 +9,7 @@ import {
     type ToolSet,
 } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { executeOverpassQuery, mapFeatureWikiRAG, nominatimLocationSearch } from './tools';
+import { executeOverpassQuery, retrieveOpenStreetMapsTagsFromKnowledgeBase, nominatimLocationSearch } from './tools';
 import { CrawlOpenStreetMapWikiTagsWorkflow } from './workflows/crawlOpenStreetMapWikiTags';
 
 const model = openai('gpt-4.1');
@@ -25,7 +25,7 @@ The Overpass QL query must contain an accurate bounding box or location matching
 Do not come up with the coordinates yourself! Instead, use the nominatimLocationSearch tool first.
 If the nominatimLocationSearch tool returns no result, try to generalize the search address.
 
-Use the mapFeatureWikiRAG tool to look up known and common tags that are best suited for the user's request and are most likely to have results.
+Use the retrieveOpenStreetMapsTagsFromKnowledgeBase tool to look up known and common tags that are best suited for the user's request and are most likely to have results.
 In the case of multiple tags describing a similar thing, use all those tags in the the Overpass query for the best result.
 
 After having the correct bounding box or location, and a list of tags that are most likely to yield the results, generate a correct Overpass QL query.
@@ -57,7 +57,7 @@ Do not use markdown formatting.
                         [toolCallId]: result,
                     }),
                 ),
-                mapFeatureWikiRAG: mapFeatureWikiRAG(this.env),
+                retrieveOpenStreetMapsTagsFromKnowledgeBase: retrieveOpenStreetMapsTagsFromKnowledgeBase(this.env),
             },
             onFinish,
             abortSignal: options?.abortSignal,
@@ -72,6 +72,18 @@ Do not use markdown formatting.
 
 export default {
     async fetch(request: Request, env: Env) {
+        // const { pathname } = new URL(request.url);
+        // if (pathname === '/crawl') {
+        //     const handle = await env.CRAWL_OPENSTREETMAP_WIKI_TAGS.create();
+        //     return new Response(handle.id);
+        // }
+        // if (pathname.startsWith('/crawl/')) {
+        //     const id = pathname.substring(7);
+        //     const handle = await env.CRAWL_OPENSTREETMAP_WIKI_TAGS.get(id);
+        //     const status = await handle.status();
+        //     return new Response(JSON.stringify(status), { headers: { 'Content-Type': 'application/json' } });
+        // }
+
         return (await routeAgentRequest(request, env)) || new Response('Not found', { status: 404 });
     },
 } satisfies ExportedHandler<Env>;
