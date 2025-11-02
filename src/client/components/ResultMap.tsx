@@ -10,7 +10,7 @@ export const ResultMap: React.FC<{ elements: OSMElement[] }> = ({ elements }) =>
     }
 
     return (
-        <MapContainer center={[0, 0]} zoom={10} scrollWheelZoom={true} className="w-full aspect-[3/2] rounded-xl">
+        <MapContainer center={[0, 0]} zoom={10} scrollWheelZoom={true} className="w-full rounded-xl aspect-square sm:aspect-[3/2]">
             <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

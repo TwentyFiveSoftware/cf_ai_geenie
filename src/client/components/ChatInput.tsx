@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button.tsx';
 import { SendIcon } from 'lucide-react';
 
 type Props = {
-    placeholder: string,
+    placeholder: string;
     sendChatMessage: (message: string) => void;
 };
 
@@ -21,6 +21,10 @@ export const ChatInput: React.FC<Props> = ({ placeholder, sendChatMessage }) => 
         sendChatMessage(userMessage);
 
         setUserMessage('');
+
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
     };
 
     return (
