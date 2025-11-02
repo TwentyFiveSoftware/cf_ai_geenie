@@ -11,6 +11,17 @@ type AgentState = Record<string, OSMElement[]>;
 
 const LOCAL_STORAGE_SESSION_KEY = 'geenie-session-id';
 
+const EXAMPLE_QUERIES: string[] = [
+    'Show me all peaks in Yosemite National Park',
+    'Show all cafés around the Eiffel Tower',
+    'Show all canals in the old town of Amsterdam, Netherlands',
+    'Show the area of Yosemite National Park',
+    'Map public restrooms in Stockholm\'s old town',
+    'Map all hiking trails around Finse, Norway',
+    'Show me the Geirangerfjord, Norway',
+    'Show me all tourist huts in a 30km radius around Mayrhofen, Austria',
+];
+
 export const App: React.FC = () => {
     const [overpassResults, setOverpassResults] = useState<AgentState>({});
 
@@ -60,12 +71,15 @@ export const App: React.FC = () => {
                         </div>
                     </div>
 
-                    <ChatInput sendChatMessage={sendChatMessage} />
+                    <ChatInput
+                        placeholder={`e.g. "${EXAMPLE_QUERIES[Math.floor(Math.random() * EXAMPLE_QUERIES.length)]}"`}
+                        sendChatMessage={sendChatMessage}
+                    />
 
                     <div className="text-xs mt-4 text-center w-full inline-block text-muted-foreground">
-                        Important: The chat is shared with OpenAI. DO NOT enter personal or sensitive information!
+                        Important: The chat is shared with OpenAI. Do not enter personal or sensitive information!
                         <br />
-                        More details on and usage policy on the{' '}
+                        For more details and the usage policy, please refer to the{' '}
                         <a
                             href="https://github.com/TwentyFiveSoftware/cf_ai_geenie"
                             className="underline cursor-pointer hover:text-primary"
@@ -100,7 +114,10 @@ export const App: React.FC = () => {
 
             <div className="grid justify-items-center p-4">
                 <div className="w-full max-w-[750px]">
-                    <ChatInput sendChatMessage={sendChatMessage} />
+                    <ChatInput
+                        placeholder="Refine your query or ask follow-up questions"
+                        sendChatMessage={sendChatMessage}
+                    />
 
                     <div className="text-xs mt-2 text-center w-full inline-block">
                         Or delete this conversation and start over with a{' '}
@@ -109,8 +126,8 @@ export const App: React.FC = () => {
                         </a>
                         .
                         <br />
-                        Important: The chat is shared with OpenAI. DO NOT enter personal or sensitive information
-                        More details on the{' '}
+                        Important: The chat is shared with OpenAI. Do not enter sensitive information — details on the
+                        usage policy on the
                         <a
                             href="https://github.com/TwentyFiveSoftware/cf_ai_geenie"
                             className="underline cursor-pointer hover:text-primary"

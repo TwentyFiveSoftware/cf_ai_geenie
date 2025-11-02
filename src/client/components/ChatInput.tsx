@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button.tsx';
 import { SendIcon } from 'lucide-react';
 
 type Props = {
+    placeholder: string,
     sendChatMessage: (message: string) => void;
 };
 
-export const ChatInput: React.FC<Props> = ({ sendChatMessage }) => {
+export const ChatInput: React.FC<Props> = ({ placeholder, sendChatMessage }) => {
     const [userMessage, setUserMessage] = useState<string>('');
 
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -26,7 +27,7 @@ export const ChatInput: React.FC<Props> = ({ sendChatMessage }) => {
         <form onSubmit={onSubmit}>
             <div className="w-full flex bg-muted p-2.5 rounded-[40px]">
                 <Input
-                    placeholder="Ask anything"
+                    placeholder={placeholder}
                     className="border-none focus-visible:ring-0"
                     autoFocus
                     value={userMessage}
