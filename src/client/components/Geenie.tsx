@@ -21,6 +21,7 @@ const EXAMPLE_QUERIES: string[] = [
 
 export const Geenie: React.FC<{ sessionID: string }> = ({ sessionID }) => {
     const [overpassResults, setOverpassResults] = useState<AgentState>({});
+    const [exampleQuery] = useState<string>(EXAMPLE_QUERIES[Math.floor(Math.random() * EXAMPLE_QUERIES.length)]);
 
     const agent = useAgent<AgentState>({
         agent: 'geenie-agent',
@@ -64,10 +65,7 @@ export const Geenie: React.FC<{ sessionID: string }> = ({ sessionID }) => {
                         </div>
                     </div>
 
-                    <ChatInput
-                        placeholder={`e.g. "${EXAMPLE_QUERIES[Math.floor(Math.random() * EXAMPLE_QUERIES.length)]}"`}
-                        sendChatMessage={sendChatMessage}
-                    />
+                    <ChatInput placeholder={`e.g. "${exampleQuery}"`} sendChatMessage={sendChatMessage} />
 
                     <div className="text-xs mt-4 text-center w-full inline-block text-muted-foreground">
                         Important: The chat is shared with OpenAI. Do not enter personal or sensitive information!
