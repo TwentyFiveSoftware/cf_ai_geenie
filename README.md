@@ -13,7 +13,7 @@ Example Queries:
 
 ## Free Access
 
-You can access Geenie for free at `TODO`.
+You can access Geenie for free at [https://geenie.twentyfivesoftware.workers.dev/](https://geenie.twentyfivesoftware.workers.dev/).
 
 However, note that data sharing with OpenAI is enabled.
 Therefore, please do not enter personal or sensitive information in the chat.
@@ -52,27 +52,17 @@ You can inspect all tool inputs and outputs in the chat by clicking on the respe
 
 First, create an OpenAI API key and add it to the `.env` file (fill in the `.env.dist`).
 
-Next, you need to create a **Cloudflare Pages** project:
-```shell
-wrangler pages project create geenie
-```
-
-Additionally, you need to create a **Cloudflare Vectorize** database:
+Then, you need to create a **Cloudflare Vectorize** database:
 
 ```shell
 wrangler vectorize create prod-openstreetmap-wiki --preset @cf/baai/bge-base-en-v1.5
 ```
 
-Finally, the worker including the AI agent can be deployed using
+Finally, the worker including the AI agent and frontend can be deployed using
 ```shell
-npm run deploy:workers
+npm run deploy
 ```
 
-The frontend can be deployed to **Cloudflare Pages** using
-```shell
-npm run build
-npm run deploy:pages
-```
 
 ### Building the RAG Index
 
@@ -95,12 +85,18 @@ wrangler vectorize info prod-openstreetmap-wiki
 ## Local Development
 
 First, create an OpenAI API key and add it to the `.env` file (fill in the `.env.dist`).
-Then, run the frontend and workers locally using
+Then, run the setup locally using
 
 ```shell
 npm run dev
-npm run dev:workers
 ```
+
+You can run a local production build using:
+
+```shell
+npm run serve
+```
+
 
 ## Credit
 

@@ -1,13 +1,11 @@
 {
+    "$schema": "node_modules/wrangler/config-schema.json",
     "name": "geenie",
     "main": "src/server/index.ts",
     "compatibility_date": "2025-08-03",
     "compatibility_flags": [
         "nodejs_compat"
     ],
-    "observability": {
-        "enabled": true
-    },
     "ai": {
         "binding": "AI",
         "remote": true
@@ -15,9 +13,7 @@
     "durable_objects": {
         "bindings": [
             {
-                // How your Agent is called from the Worker
                 "name": "GeenieAgent",
-                // Must match the class name of the Agent in the code
                 "class_name": "GeenieAgent"
             }
         ]
@@ -46,6 +42,12 @@
     ],
     "browser": {
         "binding": "BROWSER"
+    },
+    "assets": {
+        "directory": "public"
+    },
+    "observability": {
+        "enabled": true
     }
     //    "limits": {
     //        "cpu_ms": 300000
