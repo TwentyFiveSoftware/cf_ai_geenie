@@ -58,9 +58,14 @@ Then, you need to create a **Cloudflare Vectorize** database:
 wrangler vectorize create prod-openstreetmap-wiki --preset @cf/baai/bge-base-en-v1.5
 ```
 
-Finally, the worker including the AI agent and frontend can be deployed using
+Deploy the worker including the AI agent and frontend using
 ```shell
 npm run deploy
+```
+
+Finally, upload the secrets in the `.env` file to the production deployment:
+```shell
+wrangler secret bulk .env
 ```
 
 
