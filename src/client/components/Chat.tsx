@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import type { ToolUIPart, UIMessage } from 'ai';
 import { type OSMElement, ResultMap } from '@/client/components/ResultMap.tsx';
 import { CircleAlert, CircleCheckIcon, CircleQuestionMarkIcon, DotIcon, LoaderCircleIcon } from 'lucide-react';
@@ -11,6 +11,18 @@ type Props = {
 };
 
 export const Chat: React.FC<Props> = ({ messages, overpassResults, isWaitingForResponse }) => {
+    const chatEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = useCallback(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, []);
+
+    useEffect(() => {
+        if (messages.length > 0) {
+            scrollToBottom();
+        }
+    }, [messages, scrollToBottom]);
+
     return (
         <div className="flex flex-col gap-8 mb-10">
             {messages.map(message => {
@@ -29,6 +41,8 @@ export const Chat: React.FC<Props> = ({ messages, overpassResults, isWaitingForR
             })}
 
             <div>{isWaitingForResponse && <DotIcon className="stroke-8 animate-pulse" />}</div>
+
+            <div ref={chatEndRef} />
         </div>
     );
 };

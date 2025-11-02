@@ -118,7 +118,7 @@ export const Geenie: React.FC<{ sessionID: string }> = ({ sessionID }) => {
                         .
                         <br />
                         Important: The chat is shared with OpenAI. Do not enter sensitive information — details on the
-                        usage policy on the
+                        usage policy on the{' '}
                         <a
                             href="https://github.com/TwentyFiveSoftware/cf_ai_geenie"
                             className="underline cursor-pointer hover:text-primary"
