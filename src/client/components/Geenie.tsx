@@ -85,12 +85,12 @@ export const Geenie: React.FC<{ sessionID: string }> = ({ sessionID }) => {
     }
 
     return (
-        <div className="w-full h-svh grid grid-rows-[1fr_150px]">
+        <div className="w-full h-svh grid grid-rows-[1fr_170px]">
             <div
                 className="overflow-auto grid justify-items-center p-4"
                 style={{ scrollbarGutter: 'stable both-edges' }}
             >
-                <div className="w-full max-w-[750px]">
+                <div className="w-full max-w-[850px]">
                     <h1 className="text-4xl font-bold my-4 text-blue-400">
                         Geenie<span className="text-primary">.</span>
                     </h1>
@@ -104,7 +104,7 @@ export const Geenie: React.FC<{ sessionID: string }> = ({ sessionID }) => {
             </div>
 
             <div className="grid justify-items-center p-4">
-                <div className="w-full max-w-[750px]">
+                <div className="w-full max-w-[850px]">
                     <ChatInput
                         placeholder="Refine your query or ask follow-up questions"
                         sendChatMessage={sendChatMessage}

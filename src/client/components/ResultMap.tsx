@@ -5,27 +5,51 @@ import { type LatLngTuple } from 'leaflet';
 export type OSMElement = OSMNode | OSMWay | OSMRelation;
 
 export const ResultMap: React.FC<{ elements: OSMElement[] }> = ({ elements }) => {
-    if (elements.length === 0) {
-        return <div className="w-full rounded-xl border-2 py-10 text-center color-muted">No results</div>;
+    const markers = useMemo(() => {
+        try {
+            return buildMarkers(elements);
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }, [elements]);
+
+    const polygons = useMemo(() => {
+        try {
+            return buildPolygons(elements);
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }, [elements]);
+
+    if (markers.length === 0 && polygons.length === 0) {
+        return (
+            <div className="w-full rounded-xl border-2 py-10 text-center color-muted">
+                No results to show on a map.
+            </div>
+        );
     }
 
     return (
-        <MapContainer center={[0, 0]} zoom={10} scrollWheelZoom={true} className="w-full rounded-xl aspect-square sm:aspect-[3/2]">
+        <MapContainer
+            center={[0, 0]}
+            zoom={10}
+            scrollWheelZoom={true}
+            className="w-full rounded-xl aspect-square sm:aspect-[3/2]"
+        >
             <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
 
-            <MapLayers elements={elements} />
+            <MapLayers markers={markers} polygons={polygons} />
         </MapContainer>
     );
 };
 
-const MapLayers: React.FC<{ elements: OSMElement[] }> = ({ elements }) => {
+const MapLayers: React.FC<{ markers: MapMarker[]; polygons: MapPolygon[] }> = ({ markers, polygons }) => {
     const map = useMap();
-
-    const markers = useMemo(() => buildMarkers(elements), [elements]);
-    const polygons = useMemo(() => buildPolygons(elements), [elements]);
 
     useEffect(() => {
         if (markers.length === 0 && polygons.length === 0) {
@@ -156,6 +180,10 @@ const buildPolygons = (elements: OSMElement[]): MapPolygon[] => {
 
     // build 'relation' polygons
     for (const relation of relations) {
+        if (!relation.members) {
+            continue;
+        }
+
         const polygons: MapPolygon[] = [];
 
         for (const member of relation.members) {
@@ -340,8 +368,8 @@ type OSMWay = {
 type OSMRelation = {
     type: 'relation';
     id: number;
-    bounds: OSMBounds;
-    members: (OSMWay | OSMNode)[];
+    bounds?: OSMBounds;
+    members?: (OSMWay | OSMNode)[];
     tags?: Record<string, string>;
 };
 
